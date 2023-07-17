@@ -79,10 +79,72 @@
               ],
               currentWallpaper: 0,
               activeMenu: false,
+              list: [
+                {
+                  id: '1',
+                  title: 'Купить доски'
+                },
+                {
+                  id: '2',
+                  title: 'Нанять строителей'
+                },
+                {
+                  id: '3',
+                  title: 'Заплатить за аренду'
+                },
+              ],
+              inprogress: [
+                {
+                  id: '4',
+                  title: 'Закупить инструменты'
+                },
+              ],
+              done: [
+                {
+                  id: '5',
+                  title: 'Рассчитать денежные средства'
+                },
+              ]
             };
         },
         props: ['test'],
         methods: { 
+          handlerDragend(event, type){
+            console.log('handlerDragend');
+            //console.log(event.target.getAttribute('id'));
+            //Получить элемент (колонку) на которую нужно переместить задачу
+            //elementFromPoint - Функция из чистого JS, для получения его по его координатам.
+            //https://developer.mozilla.org/en-US/docs/Web/API/Document/elementFromPoint
+            let Element = document.elementFromPoint(event.x, event.y);
+            console.log(Element);
+            //Условие, при котором мы перехватываеем, момент, 
+            //когда пользователь отпускает задачу в верхний белый блок с рукой
+            // Отпускаем элемент именно над блоком с классом drop-zone
+            if(Element.getAttribute('class') == 'drop-zone'){
+                console.log('Элемент опустился над drop-zone')
+                //Найти тот самый элемент, который я перетаскиваю
+                // 1 - Из Ивента, получим идентификатор элемента
+                const id = event.target.getAttribute('id')
+                // 2 - Найти элемент из конкретного массива
+                // 2.1 - получить массив (list, inprogress или done) в переменную из которого мы перетаскиваем задачу
+                let arrayFrom = this[type];
+                // 2.2 - Найти в том массиве, задачу которую мы перетаскиваем
+                let element = arrayFrom.find(el => el.id == id);
+                console.log('element',element)
+                // 2.3 - удалить элемент, из массива, из столбца которого мы перетаскиваем
+                //Получаем новый отфильтрованный массив, со всеми элементами, кроме того, что мы перетаскиваем
+                let filteredNewArray = arrayFrom.filter(el => el.id !== id);
+                //Перезаписываем массив из которого удалили элемент
+                this[type] = filteredNewArray
+                console.log('filteredNewArray',filteredNewArray)
+                //Получим имя массива, в который перемещаем задачи
+                let arrayTo = Element.getAttribute('name');
+                console.log('arrayTo', arrayTo)
+                //Получить массив в который переносим элемент и поместим элемент в его начало
+                //unshift - функция для добавление элемента в начало массива, противоположность функции push
+                this[arrayTo].unshift(element);
+            }
+          },
           changeBackground(number){
             this.currentWallpaper = number;
             //Принудительно закрываем Меню
@@ -105,11 +167,13 @@
 
 <template>
   <div>
-    <div class='board' :style="{'background-image': `url(${wallpaper[currentWallpaper]})` }">  
+    <div class='board' :style="{'background-image': `url(${wallpaper[currentWallpaper]})` }"> 
+
       <button class='board__button-change-theme' @click='openCloseMenu'>
          <img :src='wallpaper[currentWallpaper]' />
          Сменить фон
       </button>
+
       <div :class="[activeMenu ? 'board__theme-wrapper board__theme-wrapper--active' : 'board__theme-wrapper']">
           <div id='wallpapers'>
             <div 
@@ -125,6 +189,94 @@
               {{'<'}}
           </div>
       </div>
+
+      <section class='board-content'>
+          <h2>
+            На складе
+          </h2>
+          <input 
+            placeholder='Новый товар'
+            type='text'
+            class='new-todo todo-item'
+          >
+          <div 
+            class='drop-zone'
+            name='list'
+          >
+            <img src='public/assets/cursor.png'>
+          </div>
+          <ul class='todo-list board__column'>
+              <li 
+                class='todo-item shoping__item'
+                v-for="(item, index) in list"
+                :key="item.id"
+                draggable="true"
+                @dragend="handlerDragend($event, 'list')"
+                :id="item.id"
+              >
+                {{ item.title }}
+              </li>
+          </ul>
+      </section>
+
+      <section class='board-content'>
+          <h2>
+            У курьера
+          </h2>
+          <input 
+            placeholder='Новый товар'
+            type='text'
+            class='new-todo todo-item'
+          >
+          <div 
+            class='drop-zone'
+            name='inprogress'
+          >
+            <img src='public/assets/cursor.png' draggable="false" >
+          </div>
+          <ul class='todo-list board__column'>
+              <li 
+                class='todo-item shoping__item'
+                v-for="(item, index) in inprogress"
+                :key="item.id"
+                draggable="true"
+                @dragend="handlerDragend($event, 'inprogress')"
+                :id="item.id"
+              >
+                {{ item.title }}
+              </li>
+          </ul>
+      </section>
+
+      <section class='board-content'>
+          <h2>
+            Доставлено
+          </h2>
+          <input 
+            placeholder='Новый товар'
+            type='text'
+            class='new-todo todo-item'
+          >
+          <div 
+            class='drop-zone'
+            name='done'
+          >
+            <img src='public/assets/cursor.png'>
+          </div>
+          <ul class='todo-list board__column'>
+              <li 
+                class='todo-item shoping__item'
+                v-for="(item, index) in done"
+                :key="item.id"
+                draggable="true"
+                @dragend="handlerDragend($event, 'done')"
+                :id="item.id"
+              >
+                {{ item.title }}
+              </li>
+          </ul>
+      </section>
+
     </div>
   </div>
 </template>

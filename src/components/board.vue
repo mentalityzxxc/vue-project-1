@@ -1,8 +1,12 @@
 <script>
+    import BoardColumn from './board-column.vue'
     export default {
         'name': "Board",
         data() {
             return {
+              boards: {
+
+              },
               wallpaper: [
                 "https://klevtsovaelena.github.io/wallpaper/img/BlackWhite1.jpg",
                 "https://klevtsovaelena.github.io/wallpaper/img/BlackWhite2.jpg",
@@ -104,7 +108,8 @@
                   id: '5',
                   title: 'Рассчитать денежные средства'
                 },
-              ]
+              ],
+              newTask: null,
             };
         },
         props: ['test'],
@@ -160,7 +165,20 @@
               //если перменная в значении false, то меняем на true
               this.activeMenu = true;
             }
+          },
+          addTask(task, columnName){
+            //Готовим объект с задачей
+            const taskObject = {
+              id: Math.random(),
+              title: task
+            }
+            //Пушим в определенную колонку
+            this[columnName].push(taskObject)
           }
+        },
+        //Регистрируем внешний компонент внутри родительского
+        components: {
+            'board-column': BoardColumn
         }
     }
 </script>
@@ -173,6 +191,7 @@
          <img :src='wallpaper[currentWallpaper]' />
          Сменить фон
       </button>
+      
 
       <div :class="[activeMenu ? 'board__theme-wrapper board__theme-wrapper--active' : 'board__theme-wrapper']">
           <div id='wallpapers'>
@@ -189,94 +208,9 @@
               {{'<'}}
           </div>
       </div>
-
-      <section class='board-content'>
-          <h2>
-            На складе
-          </h2>
-          <input 
-            placeholder='Новый товар'
-            type='text'
-            class='new-todo todo-item'
-          >
-          <div 
-            class='drop-zone'
-            name='list'
-          >
-            <img src='public/assets/cursor.png'>
-          </div>
-          <ul class='todo-list board__column'>
-              <li 
-                class='todo-item shoping__item'
-                v-for="(item, index) in list"
-                :key="item.id"
-                draggable="true"
-                @dragend="handlerDragend($event, 'list')"
-                :id="item.id"
-              >
-                {{ item.title }}
-              </li>
-          </ul>
-      </section>
-
-      <section class='board-content'>
-          <h2>
-            У курьера
-          </h2>
-          <input 
-            placeholder='Новый товар'
-            type='text'
-            class='new-todo todo-item'
-          >
-          <div 
-            class='drop-zone'
-            name='inprogress'
-          >
-            <img src='public/assets/cursor.png' draggable="false" >
-          </div>
-          <ul class='todo-list board__column'>
-              <li 
-                class='todo-item shoping__item'
-                v-for="(item, index) in inprogress"
-                :key="item.id"
-                draggable="true"
-                @dragend="handlerDragend($event, 'inprogress')"
-                :id="item.id"
-              >
-                {{ item.title }}
-              </li>
-          </ul>
-      </section>
-
-      <section class='board-content'>
-          <h2>
-            Доставлено
-          </h2>
-          <input 
-            placeholder='Новый товар'
-            type='text'
-            class='new-todo todo-item'
-          >
-          <div 
-            class='drop-zone'
-            name='done'
-          >
-            <img src='public/assets/cursor.png'>
-          </div>
-          <ul class='todo-list board__column'>
-              <li 
-                class='todo-item shoping__item'
-                v-for="(item, index) in done"
-                :key="item.id"
-                draggable="true"
-                @dragend="handlerDragend($event, 'done')"
-                :id="item.id"
-              >
-                {{ item.title }}
-              </li>
-          </ul>
-      </section>
-
+      <board-column :addTask="addTask" :taskModel="newTask" title='На складе' :items="list" name='list' :handlerDragend='handlerDragend'></board-column>
+      <board-column :addTask="addTask" :taskModel="newTask" title='У курьера' :items="inprogress" name='inprogress' :handlerDragend='handlerDragend'></board-column>
+      <board-column :addTask="addTask" :taskModel="newTask" title='Доставлено' :items="done" name='done' :handlerDragend='handlerDragend'></board-column>
     </div>
   </div>
 </template>
@@ -351,57 +285,6 @@
     max-width: 50px;
     margin-right: 10px;
   }
-  .drop-zone{ 
-    background: white;
-      height: 150px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-  }
-  .drop-zone img{
-    max-width: 50px;
-    margin: 10px;
-  }
-  body {
-    font-family: "Source Sans Pro", "Arial", sans-serif;
-  }
-  * {
-    box-sizing: border-box;
-  }
-  .board section{
-    width: 30%;
-    margin: 5px;
-  }
-  .todo-list {
-    list-style-type: none;
-    padding: 10px;
-  }
-  .done {
-    text-decoration: line-through;
-    color: #888;
-  }
-  .new-todo {
-    width: 100%;
-  }
-  .trash-drop {
-    border: 2px dashed #ccc !important;
-    text-align: center;
-    color: #e33;
-  }
-  .trash-drop:-moz-drag-over {
-    border: 2px solid red;
-  }
-  .todo-item {
-    position: relative;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    padding: 14px 8px;
-    margin-bottom: 3px;
-    background-color: #fff;
-    box-shadow: 1px 2px 2px #ccc;
-    font-size: 22px;
-    color: black;
-  }
   .remove-item {
     float: right;
     color: #a45;
@@ -422,40 +305,5 @@
   }
   .board {
     display: flex;
-  }
-  .board__column{
-    background-color: #ededed;
-    text-align: center;
-    min-width: 100%;
-    min-height: 80vh;
-  }
-  .board__column--in-stock{
-    width: 30%;
-    min-width: 300px;
-  }
-  .shoping__img{
-    max-width: 50px;
-    margin-right: 20px;
-  }
-  ul{
-    list-style: none;
-  }
-  .shoping__item{
-    background-color: white;
-    color: black;
-    margin: 15px 0;
-    padding: 10px;
-    border-radius: 15px;
-  }
-  .shoping__item a{
-    display: flex;
-    align-items: center;
-    color: black;
-  }
-  .shoping__item:hover{
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-  }
-  .shoping__title{
-    font-size: 24px;
   }
   </style>

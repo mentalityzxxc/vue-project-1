@@ -1,13 +1,22 @@
 <script>
 export default {
     name: "Login",
+    data() {
+        return {
+            login: '',
+            password: '',
+        }
+    },
     methods: {
         onSubmit(){
             //alert('Отправка формы')
-            this.handlerLogin()
+            this.handlerLogin(
+                this.login,
+                this.password
+            )
         }
     },
-    props: ['handlerLogin']
+    props: ['handlerLogin', 'error']
 }
 </script>
 
@@ -16,9 +25,10 @@ export default {
   <div class="form">
     <h1>Авторизация</h1>
     <form v-on:submit.prevent="onSubmit">
-        <input placeholder="Введите логин" name="login" class='login' type="text" />
-        <input placeholder="Введите пароль" name="passord" class='password' type="password" />
+        <input v-model='login' placeholder="Введите логин" name="login" class='login' type="text" />
+        <input v-model='password' placeholder="Введите пароль" name="passord" class='password' type="password" />
         <input type="submit" class='enter' value='Войти' />
+        {{this.error}}
     </form>
   </div>
  </div>

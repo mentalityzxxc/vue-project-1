@@ -112,7 +112,7 @@
               newTask: null,
             };
         },
-        props: ['test'],
+        props: ['test', 'user', 'logout'],
         methods: { 
           handlerDragend(event, type){
             console.log('handlerDragend');
@@ -192,6 +192,17 @@
          Сменить фон
       </button>
       
+      <div class='user-block'>
+        <div class='avatar'>
+            <img :src="this.user.avatar" :alt="this.user.login">
+        </div>
+        <div class='login'>
+          {{this.user.login}}
+        </div>
+        <button @click="logout">
+          Выйти
+        </button>
+      </div>
 
       <div :class="[activeMenu ? 'board__theme-wrapper board__theme-wrapper--active' : 'board__theme-wrapper']">
           <div id='wallpapers'>
@@ -216,6 +227,24 @@
 </template>
 
 <style scoped>
+  .user-block{
+    background: white;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    color: black;
+    width: 200px;
+    display: flex;
+    align-items: center;
+    z-index: 2;
+    padding: 5px;
+  }
+  .avatar{
+    height: 100px;
+  }
+  .user-block img{
+     height: 100%;
+  }
   .close-wallpapers{
     display: flex;
     position: fixed;

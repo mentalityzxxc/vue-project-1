@@ -1,12 +1,13 @@
 <script>
 import Board from './components/board.vue'
 import Login from './components/login.vue'
+import Registration from './components/registration.vue'
 
 export default {
     name: "App",
     data() {
       return {
-        isAuth: false,
+        isAuth: 'auth',
         error: undefined,
         userData: null,
         users: [
@@ -29,6 +30,9 @@ export default {
       }
     },
     methods: {
+      switchDisplay(display){
+        this.isAuth = display;
+      },
       login(login, password){
         console.log('Авторизация');
         //Получить в методу, введенный пользователем логин и пароль
@@ -51,27 +55,60 @@ export default {
             // 2 - меняем флаг isAuth, который влияет на отображение определенного компонента
             // 3 - запишем данные пользователя для передачи в компонент board
             component.error = undefined
-            component.isAuth = true;
+            component.isAuth = 'end';
             component.userData = user
          } else {
             component.error = 'Пользователь не найден';
          }
       },
+      registration(login, password){
+        console.log(`registration: ${login}, ${password}`);
+        //Проверяем, не существуюет ли уже, аналогичного пользователя в базе данных
+        const searchUserInDB = this.users.find(function(user) {
+          //Метод find, по аналогии с forEach перебирает все эдлементы массива users в компоненте
+          // Если находит совпадение с пользователем в массиве и логином введенным с формы, тогда возвращается найденный пользователь
+          if(user.login == login) {
+            return user
+          }
+        });
+
+        if (searchUserInDB) {
+            //Если пользователь нашелся в базе, выводим ошибку
+             this.error = 'Пользователь с таким логином уже есть в системе';
+        } else {
+          //Если такого логина нет, нужно закончить регистрацию
+          //Создадим объект пользователя, который добави в базу данных
+          let user = {
+            login: login,
+            password: password
+          }
+          //Обновим базу данных, запушив объект пользователя в общий масиив с пользователями
+          this.users.push(user)
+
+          //Производим авторизацию в приложении
+          this.error = undefined
+          this.isAuth = 'end';
+          this.userData = user
+
+        }
+      },
       logout(){
-          this.isAuth = false;
+          this.isAuth = 'auth';
           this.userData = null
       }
     },
     components:{
       Board,
-      Login
+      Login,
+      Registration
     }
 }
 </script>
 
 <template>
-  <Board test='Тестовый входящий параметр' :user="userData" :logout="logout" v-if="isAuth"/>
-  <Login :handlerLogin='login' :error="error" v-else/>
+  <Login :handlerLogin='login' :error="error" v-if="isAuth === 'auth'" :swither="switchDisplay" />
+  <Registration :handlerRegistration='registration' v-else-if="isAuth === 'reg'" :swither="switchDisplay"/>
+  <Board :user="userData" :logout="logout" v-else-if="isAuth === 'end'" />
   <div v-if="error" class="error">{{error}}</div>
 </template>
 

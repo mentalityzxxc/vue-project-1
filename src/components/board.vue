@@ -174,6 +174,42 @@
             }
             //Пушим в определенную колонку
             this[columnName].push(taskObject)
+          },
+          delTask(idTask, columnName){
+            //Найти в нежной колонке, данные и отфильтровать их таким образом, чтобы удаляемая задача не появилась на интрфейсе
+            this
+            columnName
+
+            const newDataInColumn = this[columnName].filter( function(task) {
+              console.log('task',task)
+              //Если идентификатор, задачи, которую мы перебираем в цикле с помощью функции filter, НЕ равен, ID удаляемой задачи
+              if(idTask !== task.id) {
+                //То возвращаем этот элемент в новый массив
+                return task
+              }
+            })
+            console.log('Новые данные', newDataInColumn)
+            //Перезапишем данные на полученные из предыдущего шага
+            this[columnName] = newDataInColumn;
+          },
+          editTask(idTask, columnName){
+            //Найдем старый заголовок задачи 
+            //Декомпозируем нужное поле объекта
+            const { title } = this[columnName].find(function(task){
+                //Ищем задачу по передаваемому идентификатору
+                if(task.id == idTask) {
+                  return task; 
+                }
+            })
+            console.log(title)
+            const newTitle = prompt('Введите новое название задачи', title);
+            //Перебираем еще раз колонку задач для редактирования
+            this[columnName].forEach(function(task, index){
+                //Ищем задачу по передаваемому идентификатору
+                if(task.id == idTask) {
+                  this[columnName][index] = newTitle
+                }
+            })
           }
         },
         //Регистрируем внешний компонент внутри родительского
@@ -192,7 +228,7 @@
          Сменить фон
       </button>
       
-      <div class='user-block'>
+      <div class='user-block' v-if='this.user'>
         <div class='avatar'>
             <img :src="this.user.avatar" :alt="this.user.login">
         </div>
@@ -219,9 +255,38 @@
               {{'<'}}
           </div>
       </div>
-      <board-column :addTask="addTask" :taskModel="newTask" title='На складе' :items="list" name='list' :handlerDragend='handlerDragend'></board-column>
-      <board-column :addTask="addTask" :taskModel="newTask" title='У курьера' :items="inprogress" name='inprogress' :handlerDragend='handlerDragend'></board-column>
-      <board-column :addTask="addTask" :taskModel="newTask" title='Доставлено' :items="done" name='done' :handlerDragend='handlerDragend'></board-column>
+      <board-column 
+        :delTask="delTask" 
+        :addTask="addTask" 
+        :editTask="editTask" 
+        :taskModel="newTask" 
+        title='На складе' 
+        :items="list" 
+        name='list' 
+        :handlerDragend='handlerDragend'
+      ></board-column>
+      <board-column 
+        :delTask="delTask" 
+        :addTask="addTask" 
+        :editTask="editTask" 
+        :taskModel="newTask" 
+        title='У курьера' 
+        :items="inprogress" 
+        name='inprogress' 
+        :handlerDragend='handlerDragend'
+      >
+      </board-column>
+      <board-column 
+        :delTask="delTask" 
+        :addTask="addTask" 
+        :editTask="editTask" 
+        :taskModel="newTask" 
+        title='Доставлено' 
+        :items="done" 
+        name='done' 
+        :handlerDragend='handlerDragend'
+      >
+      </board-column>
     </div>
   </div>
 </template>

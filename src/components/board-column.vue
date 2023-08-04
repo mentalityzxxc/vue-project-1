@@ -4,7 +4,16 @@
         data() {
 
         },
-        props: ['title', 'items', 'name', 'handlerDragend', 'taskModel', 'addTask'],
+        props: [
+            'title', 
+            'items', 
+            'name', 
+            'handlerDragend', 
+            'taskModel', 
+            'addTask', 
+            'delTask', 
+            'editTask'
+        ],
         methods: {
 
         }
@@ -38,6 +47,10 @@
                 :id="item.id"
               >
                 {{ item.title }}
+                <div>
+                    <button @click="editTask(item.id, name)">Редактировать</button>
+                    <button @click="delTask(item.id, name)">Удалить</button>
+                </div>
               </li>
           </ul>
       </section>
